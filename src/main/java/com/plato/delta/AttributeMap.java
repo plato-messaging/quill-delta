@@ -1,8 +1,6 @@
 package com.plato.delta;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class AttributeMap extends HashMap<String, Object> {
 
@@ -23,7 +21,45 @@ public class AttributeMap extends HashMap<String, Object> {
   }
 
   static AttributeMap of(String key, Object value) {
-    return new AttributeMap(Map.of(key, value));
+    Map<String, Object> temp = new HashMap<>();
+    temp.put(key, value);
+    return new AttributeMap(temp);
+  }
+
+  static AttributeMap of(String key0, Object value0, String key1, Object value1) {
+    Map<String, Object> temp = new HashMap<>();
+    temp.put(key0, value0);
+    temp.put(key1, value1);
+    return new AttributeMap(temp);
+  }
+
+  static AttributeMap of(String key0,
+                         Object value0,
+                         String key1,
+                         Object value1,
+                         String key2,
+                         Object value2) {
+    Map<String, Object> temp = new HashMap<>();
+    temp.put(key0, value0);
+    temp.put(key1, value1);
+    temp.put(key2, value2);
+    return new AttributeMap(temp);
+  }
+
+  static AttributeMap of(String key0,
+                         Object value0,
+                         String key1,
+                         Object value1,
+                         String key2,
+                         Object value2,
+                         String key3,
+                         Object value3) {
+    Map<String, Object> temp = new HashMap<>();
+    temp.put(key0, value0);
+    temp.put(key1, value1);
+    temp.put(key2, value2);
+    temp.put(key3, value3);
+    return new AttributeMap(temp);
   }
 
   /**
@@ -35,11 +71,17 @@ public class AttributeMap extends HashMap<String, Object> {
    * @return the composed attribute map
    */
   static AttributeMap compose(AttributeMap a, AttributeMap b, boolean keepNull) {
-    AttributeMap _a = a == null ? a : new AttributeMap();
-    AttributeMap _b = b == null ? b : new AttributeMap();
+    AttributeMap _a = a != null ? a : new AttributeMap();
+    AttributeMap _b = b != null ? b : new AttributeMap();
     AttributeMap attributes = new AttributeMap(_b);
-    if (!keepNull)
-      attributes.remove(null);
+    if (!keepNull) {
+      Set<String> keysToRemove = new HashSet<>();
+      attributes.forEach((key, value) -> {
+        if (value == null)
+          keysToRemove.add(key);
+      });
+      keysToRemove.forEach(attributes::remove);
+    }
 
     for (String key : _a.keySet()) {
       if (_a.get(key) != null && !_b.containsKey(key))
@@ -49,19 +91,23 @@ public class AttributeMap extends HashMap<String, Object> {
     return attributes.isEmpty() ? null : new AttributeMap(attributes);
   }
 
+  static AttributeMap compose(AttributeMap a, AttributeMap b) {
+    return compose(a, b, false);
+  }
+
   /**
    * @param a
    * @param b
    * @return
    */
   static AttributeMap diff(AttributeMap a, AttributeMap b) {
-    AttributeMap _a = a == null ? a : new AttributeMap();
-    AttributeMap _b = b == null ? b : new AttributeMap();
+    AttributeMap _a = a != null ? a : new AttributeMap();
+    AttributeMap _b = b != null ? b : new AttributeMap();
     AttributeMap attributes = new AttributeMap();
-    Set<String> keys = _a.keySet();
+    Set<String> keys = new HashSet<>(_a.keySet());
     keys.addAll(_b.keySet());
     for (String k : keys) {
-      if (!_a.get(k).equals(_b.get(k)))
+      if (!Objects.equals(_a.get(k), _b.get(k)))
         attributes.put(k, _b.get(k));
     }
     return attributes.isEmpty() ? null : attributes;
@@ -73,15 +119,15 @@ public class AttributeMap extends HashMap<String, Object> {
    * @return
    */
   static AttributeMap invert(AttributeMap attr, AttributeMap base) {
-    AttributeMap _attr = attr == null ? attr : new AttributeMap();
-    AttributeMap _base = base == null ? base : new AttributeMap();
+    AttributeMap _attr = attr != null ? attr : new AttributeMap();
+    AttributeMap _base = base != null ? base : new AttributeMap();
     AttributeMap baseInverted = new AttributeMap();
     for (String k : _base.keySet()) {
       if (!_base.get(k).equals(_attr.get(k)) && _attr.containsKey(k))
         baseInverted.put(k, _base.get(k));
     }
     for (String k : _attr.keySet()) {
-      if (!_attr.get(k).equals(_base.get(k)) && !_base.containsKey(k))
+      if (!Objects.equals(_attr.get(k), _base.get(k)) && !_base.containsKey(k))
         baseInverted.put(k, null);
     }
     return baseInverted;
