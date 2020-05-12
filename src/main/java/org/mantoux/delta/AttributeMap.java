@@ -1,4 +1,4 @@
-package com.plato.delta;
+package org.mantoux.delta;
 
 import java.util.*;
 

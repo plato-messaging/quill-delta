@@ -1,8 +1,8 @@
-package com.plato.delta;
+package org.mantoux.delta;
 
 import java.util.Objects;
 
-import static com.plato.delta.Op.Type.*;
+import static org.mantoux.delta.Op.Type.*;
 
 public class Op {
   private Object  insert;

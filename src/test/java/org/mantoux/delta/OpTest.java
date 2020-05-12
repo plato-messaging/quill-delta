@@ -1,12 +1,12 @@
-package com.plato.delta;
+package org.mantoux.delta;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static com.plato.delta.AttributeMap.of;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mantoux.delta.AttributeMap.of;
 
 @DisplayName("Op")
 class OpTest {

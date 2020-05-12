@@ -1,4 +1,4 @@
-package com.plato.delta;
+package org.mantoux.delta;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Map;
 
-import static com.plato.delta.AttributeMap.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
@@ -21,9 +20,9 @@ class DeltaBuilderTest {
     @BeforeEach
     public void beforeEach() {
       ops.add(Op.insert("abc"));
-      ops.add(Op.retain(1, of("color", "red")));
+      ops.add(Op.retain(1, AttributeMap.of("color", "red")));
       ops.add(Op.delete(4));
-      ops.add(Op.insert("def", of("bold", true)));
+      ops.add(Op.insert("def", AttributeMap.of("bold", true)));
       ops.add(Op.retain(6));
     }
 
@@ -85,7 +84,7 @@ class DeltaBuilderTest {
 
     @Test
     public void insertEmbeddedWithAttribute() {
-      var attribute = of("url", "https://plato.mantoux.org", "alt", "Plato");
+      var attribute = AttributeMap.of("url", "https://plato.mantoux.org", "alt", "Plato");
       var delta = new Delta().insert(1, attribute);
       assertEquals(1, delta.ops.size());
       assertEquals(Op.insert(1, attribute), delta.ops.get(0));
@@ -94,7 +93,7 @@ class DeltaBuilderTest {
     @Test
     public void insertEmbeddedNonInteger() {
       var embed = Map.of("url", "https://plato.mantoux.org");
-      var attribute = of("alt", "Plato");
+      var attribute = AttributeMap.of("alt", "Plato");
       var delta = new Delta().insert(embed, attribute);
       assertEquals(1, delta.ops.size());
       assertEquals(Op.insert(embed, attribute), delta.ops.get(0));
@@ -102,9 +101,9 @@ class DeltaBuilderTest {
 
     @Test
     public void insertTextAttributes() {
-      var delta = new Delta().insert("test", of("bold", true));
+      var delta = new Delta().insert("test", AttributeMap.of("bold", true));
       assertEquals(1, delta.ops.size());
-      assertEquals(Op.insert("test", of("bold", true)), delta.ops.get(0));
+      assertEquals(Op.insert("test", AttributeMap.of("bold", true)), delta.ops.get(0));
     }
 
     @Test
@@ -179,9 +178,9 @@ class DeltaBuilderTest {
 
     @Test
     public void retainWithAttribute() {
-      var delta = new Delta().retain(1, of("bold", true));
+      var delta = new Delta().retain(1, AttributeMap.of("bold", true));
       assertEquals(1, delta.ops.size());
-      assertEquals(Op.retain(1, of("bold", true)), delta.ops.get(0));
+      assertEquals(Op.retain(1, AttributeMap.of("bold", true)), delta.ops.get(0));
     }
 
     @Test
@@ -220,38 +219,39 @@ class DeltaBuilderTest {
 
     @Test
     public void pushConsecutiveTextWithMatchingAttributes() {
-      var delta = new Delta().insert("a", of("bold", true));
-      delta.push(Op.insert("b", of("bold", true)));
+      var delta = new Delta().insert("a", AttributeMap.of("bold", true));
+      delta.push(Op.insert("b", AttributeMap.of("bold", true)));
       assertEquals(1, delta.ops.size());
-      assertEquals(Op.insert("ab", of("bold", true)), delta.ops.get(0));
+      assertEquals(Op.insert("ab", AttributeMap.of("bold", true)), delta.ops.get(0));
     }
 
     @Test
     public void pushConsecutiveRetainsWithMatchingAttributes() {
-      var delta = new Delta().retain(1, of("bold", true));
-      delta.push(Op.retain(3, of("bold", true)));
+      var delta = new Delta().retain(1, AttributeMap.of("bold", true));
+      delta.push(Op.retain(3, AttributeMap.of("bold", true)));
       assertEquals(1, delta.ops.size());
-      assertEquals(Op.retain(4, of("bold", true)), delta.ops.get(0));
+      assertEquals(Op.retain(4, AttributeMap.of("bold", true)), delta.ops.get(0));
     }
 
     @Test
     public void pushConsecutiveTextWithMismatchedAttributes() {
-      var delta = new Delta().insert("a", of("bold", true));
+      var delta = new Delta().insert("a", AttributeMap.of("bold", true));
       delta.push(Op.insert("b"));
       assertEquals(2, delta.ops.size());
     }
 
     @Test
     public void pushConsecutiveRetainsWithMismatchedAttributes() {
-      var delta = new Delta().retain(1, of("bold", true));
+      var delta = new Delta().retain(1, AttributeMap.of("bold", true));
       delta.retain(3);
       assertEquals(2, delta.ops.size());
     }
 
     @Test
     public void pushConsecutiveEmbedsWithMatchingAttributes() {
-      var delta = new Delta().insert(1, of("alt", "Description"));
-      delta.push(Op.insert(Map.of("url", "https://plato.mantoux.org"), of("alt", "Plato")));
+      var delta = new Delta().insert(1, AttributeMap.of("alt", "Description"));
+      delta.push(Op.insert(Map.of("url", "https://plato.mantoux.org"),
+                           AttributeMap.of("alt", "Plato")));
       assertEquals(2, delta.ops.size());
     }
   }

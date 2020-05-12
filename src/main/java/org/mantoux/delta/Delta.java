@@ -1,4 +1,4 @@
-package com.plato.delta;
+package org.mantoux.delta;
 
 import java.util.List;
 import java.util.Objects;
@@ -8,8 +8,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static com.plato.delta.Op.Type.DELETE;
-import static com.plato.delta.Op.Type.INSERT;
+import static org.mantoux.delta.Op.Type.DELETE;
+import static org.mantoux.delta.Op.Type.INSERT;
 
 public class Delta {
   OpList ops;
