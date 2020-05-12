@@ -1,6 +1,6 @@
 # QuillDelta
 
-A java version of the fabulous QuillJS delta implementation
+A java implementation of the fabulous QuillJS delta
 
 https://github.com/quilljs/delta
 
