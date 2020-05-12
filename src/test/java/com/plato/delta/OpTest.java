@@ -1,12 +1,14 @@
 package com.plato.delta;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import static com.plato.delta.AttributeMap.of;
 import static org.junit.jupiter.api.Assertions.*;
 
+@DisplayName("Op")
 class OpTest {
 
   @Nested

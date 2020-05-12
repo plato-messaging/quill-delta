@@ -105,11 +105,11 @@ public class Op {
   public String toString() {
     switch (type()) {
       case RETAIN:
-        return "Op :{\n" + RETAIN.name().toLowerCase() + ": " + retain + "\n}";
+        return "Op: {\n  " + RETAIN.name().toLowerCase() + ": " + retain + "\n}";
       case INSERT:
-        return "Op :{\n" + INSERT.name().toLowerCase() + ": " + insert + "\n}";
+        return "Op: {\n  " + INSERT.name().toLowerCase() + ": " + insert + "\n}";
       case DELETE:
-        return "Op :{\n" + DELETE.name().toLowerCase() + ": " + delete + "\n}";
+        return "Op: {\n  " + DELETE.name().toLowerCase() + ": " + delete + "\n}";
     }
     return "Error";
   }

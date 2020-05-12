@@ -24,6 +24,10 @@ public class Delta {
     this(new OpList());
   }
 
+  public Delta(Delta delta) {
+    this(delta.ops);
+  }
+
   public Delta insert(Object arg, AttributeMap attributes) {
     if (arg == null)
       return this;
@@ -65,13 +69,15 @@ public class Delta {
       ops.set(index - 1, Op.delete(lastOp.length() + newOp.length()));
       return this;
     }
+    // Since it does not matter if we insert before or after deleting at the same index,
+    // always prefer to insert first
     if (lastOp.isDelete() && newOp.isInsert()) {
       index -= 1;
-      lastOp = ops.get(index - 1);
       if (index == 0) {
         ops.insertFirst(newOp);
         return this;
       }
+      lastOp = ops.get(index - 1);
     }
 
     if (Objects.equals(newOp.attributes(), lastOp.attributes())) {
@@ -92,7 +98,7 @@ public class Delta {
     if (index == ops.size())
       ops.add(newOp);
     else
-      ops.insertFirst(newOp);
+      ops.add(index, newOp);
     return this;
   }
 
@@ -285,5 +291,25 @@ public class Delta {
       delta.ops.addAll(other.ops.subList(1, other.ops.size()));
     }
     return delta;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(ops);
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o)
+      return true;
+    if (o == null || getClass() != o.getClass())
+      return false;
+    Delta delta = (Delta) o;
+    return Objects.equals(ops, delta.ops);
+  }
+
+  @Override
+  public String toString() {
+    return "Delta{" + "ops=" + ops + '}';
   }
 }

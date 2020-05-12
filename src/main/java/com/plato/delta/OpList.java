@@ -34,7 +34,7 @@ public class OpList extends ArrayList<Op> {
     return new Iterator(this);
   }
 
-  static class Iterator implements java.util.Iterator {
+  static class Iterator implements java.util.Iterator<Op> {
 
     private final OpList ops;
 
