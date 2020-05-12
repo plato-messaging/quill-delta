@@ -1,32 +1,52 @@
 package org.mantoux.delta;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
 import java.util.Objects;
 
-import static org.mantoux.delta.Op.Type.*;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static org.mantoux.delta.Op.Type.DELETE;
+import static org.mantoux.delta.Op.Type.RETAIN;
 
+@JsonInclude(value = NON_EMPTY)
 public class Op {
+  @JsonProperty()
   private Object  insert;
+  @JsonProperty()
   private Integer delete;
+  @JsonProperty()
   private Integer retain;
 
+  @JsonProperty()
   private AttributeMap attributes;
 
+  @JsonIgnore
   public boolean isDelete() {
     return type().equals(DELETE);
   }
 
+  @JsonIgnore
   public boolean isInsert() {
     return type().equals(Type.INSERT);
   }
 
+  @JsonIgnore
   public boolean isStringInsert() {
     return isInsert() && insert instanceof String;
   }
 
+  @JsonIgnore
   public boolean isRetain() {
     return type().equals(RETAIN);
   }
 
+  @JsonGetter("type")
   public Type type() {
     if (insert != null)
       return Type.INSERT;
@@ -103,15 +123,13 @@ public class Op {
 
   @Override
   public String toString() {
-    switch (type()) {
-      case RETAIN:
-        return "Op: {\n  " + RETAIN.name().toLowerCase() + ": " + retain + "\n}";
-      case INSERT:
-        return "Op: {\n  " + INSERT.name().toLowerCase() + ": " + insert + "\n}";
-      case DELETE:
-        return "Op: {\n  " + DELETE.name().toLowerCase() + ": " + delete + "\n}";
+    ObjectMapper mapper = new ObjectMapper();
+    ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
+    try {
+      return writer.writeValueAsString(this);
+    } catch (JsonProcessingException e) {
+      return "Error while generating json:\n" + e.getMessage();
     }
-    return "Error";
   }
 
   public enum Type {

@@ -1,5 +1,11 @@
 package org.mantoux.delta;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -8,10 +14,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static org.mantoux.delta.Op.Type.DELETE;
 import static org.mantoux.delta.Op.Type.INSERT;
 
+@JsonInclude(value = NON_EMPTY)
 public class Delta {
+  @JsonProperty("ops")
   OpList ops;
 
   public Delta(OpList ops) {
@@ -155,29 +164,10 @@ public class Delta {
     return reduce(0, (length, op) -> length + op.length());
   }
 
-  // TODO: P1 - TO TEST
-  public Delta slice(int start, int end) {
-    final OpList ops = new OpList();
-    final OpList.Iterator it = this.ops.iterator();
-    int index = 0;
-    while (index < end && it.hasNext()) {
-      Op nextOp;
-      if (index < start)
-        nextOp = it.next(start - index);
-      else {
-        nextOp = it.next(end - index);
-        ops.add(nextOp);
-      }
-      index += nextOp.length();
-    }
-    return new Delta(ops);
-  }
-
   public Delta slice(int start) {
     return slice(start, Integer.MAX_VALUE);
   }
 
-  // TODO: P1 - TO TEST
   public Delta compose(Delta other) {
     final OpList.Iterator it = ops.iterator();
     final OpList.Iterator otherIt = other.ops.iterator();
@@ -215,7 +205,7 @@ public class Delta {
           if (thisOp.isRetain())
             newOp = Op.retain(length, attributes);
           else
-            newOp = Op.insert(thisOp.isInsert(), attributes);
+            newOp = Op.insert(thisOp.arg(), attributes);
           delta.push(newOp);
           // Optimization if rest of other is just retain
           if (!otherIt.hasNext() && delta.ops.get(delta.ops.size() - 1).equals(newOp)) {
@@ -267,6 +257,7 @@ public class Delta {
         inverted.delete(op.length());
       else if (op.isRetain() && op.attributes() == null) {
         inverted.retain(op.length());
+        return baseIndex + op.length();
       } else if (op.isDelete() || (op.isRetain() && op.hasAttributes())) {
         int length = op.length();
         final Delta slice = base.slice(baseIndex, baseIndex + length);
@@ -282,6 +273,23 @@ public class Delta {
       return baseIndex;
     });
     return inverted.chop();
+  }
+
+  private Delta slice(int start, int end) {
+    final OpList ops = new OpList();
+    final OpList.Iterator it = this.ops.iterator();
+    int index = 0;
+    while (index < end && it.hasNext()) {
+      Op nextOp;
+      if (index < start)
+        nextOp = it.next(start - index);
+      else {
+        nextOp = it.next(end - index);
+        ops.add(nextOp);
+      }
+      index += nextOp.length();
+    }
+    return new Delta(ops);
   }
 
   private Delta concat(Delta other) {
@@ -310,6 +318,12 @@ public class Delta {
 
   @Override
   public String toString() {
-    return "Delta{" + "ops=" + ops + '}';
+    ObjectMapper mapper = new ObjectMapper();
+    ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
+    try {
+      return writer.writeValueAsString(this);
+    } catch (JsonProcessingException e) {
+      return "Error while generating json:\n" + e.getMessage();
+    }
   }
 }

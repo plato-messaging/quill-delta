@@ -1,13 +1,16 @@
 package org.mantoux.delta;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.util.stream.Collectors.toList;
 
+@JsonInclude(value = NON_EMPTY)
 public class OpList extends ArrayList<Op> {
-
 
   OpList(List<Op> ops) {
     super(ops);
