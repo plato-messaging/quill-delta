@@ -275,7 +275,7 @@ public class Delta {
     return inverted.chop();
   }
 
-  private Delta slice(int start, int end) {
+  public Delta slice(int start, int end) {
     final OpList ops = new OpList();
     final OpList.Iterator it = this.ops.iterator();
     int index = 0;
@@ -292,7 +292,7 @@ public class Delta {
     return new Delta(ops);
   }
 
-  private Delta concat(Delta other) {
+  public Delta concat(Delta other) {
     final Delta delta = new Delta(new OpList(ops));
     if (!other.ops.isEmpty()) {
       delta.push(other.ops.get(0));
