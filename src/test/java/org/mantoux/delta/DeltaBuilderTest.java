@@ -5,10 +5,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.util.Map;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mantoux.delta.Op.EMBED;
 
 @DisplayName("Delta building")
 class DeltaBuilderTest {
@@ -77,27 +76,27 @@ class DeltaBuilderTest {
 
     @Test
     public void insertEmbedded() {
-      var delta = new Delta().insert(1);
+      var delta = new Delta().insert(EMBED);
       assertEquals(1, delta.ops.size());
-      assertEquals(Op.insert(1), delta.ops.get(0));
+      assertEquals(Op.insert(EMBED), delta.ops.get(0));
     }
 
     @Test
     public void insertEmbeddedWithAttribute() {
       var attribute = AttributeMap.of("url", "https://plato.mantoux.org", "alt", "Plato");
-      var delta = new Delta().insert(1, attribute);
+      var delta = new Delta().insert(EMBED, attribute);
       assertEquals(1, delta.ops.size());
-      assertEquals(Op.insert(1, attribute), delta.ops.get(0));
+      assertEquals(Op.insert(EMBED, attribute), delta.ops.get(0));
     }
 
-    @Test
+    /*@Test
     public void insertEmbeddedNonInteger() {
       var embed = Map.of("url", "https://plato.mantoux.org");
       var attribute = AttributeMap.of("alt", "Plato");
       var delta = new Delta().insert(embed, attribute);
       assertEquals(1, delta.ops.size());
       assertEquals(Op.insert(embed, attribute), delta.ops.get(0));
-    }
+    }*/
 
     @Test
     public void insertTextAttributes() {
@@ -122,8 +121,8 @@ class DeltaBuilderTest {
 
     @Test
     public void insertTextAfterDeleteNoMerge() {
-      var delta = new Delta().insert(1).delete(1).insert("a");
-      var expected = new Delta().insert(1).insert("a").delete(1);
+      var delta = new Delta().insert(EMBED).delete(1).insert("a");
+      var expected = new Delta().insert(EMBED).insert("a").delete(1);
       assertEquals(expected, delta);
     }
 
@@ -249,9 +248,8 @@ class DeltaBuilderTest {
 
     @Test
     public void pushConsecutiveEmbedsWithMatchingAttributes() {
-      var delta = new Delta().insert(1, AttributeMap.of("alt", "Description"));
-      delta.push(Op.insert(Map.of("url", "https://plato.mantoux.org"),
-                           AttributeMap.of("alt", "Plato")));
+      var delta = new Delta().insert(EMBED, AttributeMap.of("alt", "Description"));
+      delta.push(Op.insert(EMBED, AttributeMap.of("alt", "Plato")));
       assertEquals(2, delta.ops.size());
     }
   }

@@ -30,7 +30,7 @@ class OpTest {
 
     @Test
     public void lengthInsertEmbedded() {
-      assertEquals(Op.insert(2).length(), 1);
+      assertEquals(Op.insert(Op.EMBED).length(), 1);
     }
   }
 

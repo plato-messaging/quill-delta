@@ -21,7 +21,7 @@ import static org.mantoux.delta.Op.Type.INSERT;
 @JsonInclude(value = NON_EMPTY)
 public class Delta {
   @JsonProperty("ops")
-  OpList ops;
+  final OpList ops;
 
   public Delta(OpList ops) {
     if (ops == null)
@@ -37,15 +37,20 @@ public class Delta {
     this(delta.ops);
   }
 
-  public Delta insert(Object arg, AttributeMap attributes) {
+  public OpList getOps() {
+    return new OpList(ops);
+  }
+
+  public Delta insert(String arg, AttributeMap attributes) {
     if (arg == null)
       return this;
-    if (arg instanceof String && ((String) arg).isBlank())
+    // 0x200b is NOT a white space character
+    if (arg.isBlank())
       return this;
     return push(Op.insert(arg, attributes));
   }
 
-  public Delta insert(Object arg) {
+  public Delta insert(String arg) {
     return insert(arg, null);
   }
 
@@ -230,7 +235,7 @@ public class Delta {
       final Op thisOp = it.peek();
       final int start = thisOp.length() - it.peekLength();
       final int index =
-        thisOp.isStringInsert() ? thisOp.argAsString().indexOf(newLine, start) - start : -1;
+        thisOp.isTextInsert() ? thisOp.argAsString().indexOf(newLine, start) - start : -1;
       if (index < 0)
         line.push(it.next());
       else if (index > 0)

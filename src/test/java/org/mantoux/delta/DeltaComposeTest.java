@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mantoux.delta.AttributeMap.of;
+import static org.mantoux.delta.Op.EMBED;
 
 @DisplayName("Delta composing")
 public class DeltaComposeTest {
@@ -87,7 +88,6 @@ public class DeltaComposeTest {
   @Test
   public void insertDeleteOrdering() {
     var a = new Delta().insert("Hello");
-    var b = new Delta().insert("Hello");
     var insertFirst = new Delta().retain(3).insert("X").delete(1);
     var deleteFirst = new Delta().retain(3).delete(1).insert("X");
     var expected = new Delta().insert("HelXo");
@@ -97,9 +97,10 @@ public class DeltaComposeTest {
 
   @Test
   public void insertEmbed() {
-    var a = new Delta().insert(1, of("src", "https://plato.mantoux.org"));
+    var a = new Delta().insert(EMBED, of("src", "https://plato.mantoux.org"));
     var b = new Delta().retain(1, of("alt", "Plato"));
-    var expected = new Delta().insert(1, of("src", "https://plato.mantoux.org", "alt", "Plato"));
+    var expected =
+      new Delta().insert(EMBED, of("src", "https://plato.mantoux.org", "alt", "Plato"));
     assertEquals(expected, a.compose(b));
   }
 
@@ -119,7 +120,7 @@ public class DeltaComposeTest {
 
   @Test
   public void retainEmptyEmbed() {
-    var a = new Delta().insert(1);
+    var a = new Delta().insert(EMBED);
     var b = new Delta().retain(1);
     assertEquals(a, a.compose(b));
   }
@@ -133,9 +134,9 @@ public class DeltaComposeTest {
 
   @Test
   public void removeAllEmbedAttributes() {
-    var a = new Delta().insert(2, of("src", "https://plato.mantoux.org"));
+    var a = new Delta().insert(EMBED, of("src", "https://plato.mantoux.org"));
     var b = new Delta().retain(1, of("src", null));
-    assertEquals(new Delta().insert(2), a.compose(b));
+    assertEquals(new Delta().insert(EMBED), a.compose(b));
   }
 
   @Test

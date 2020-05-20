@@ -16,8 +16,12 @@ import static org.mantoux.delta.Op.Type.RETAIN;
 
 @JsonInclude(value = NON_EMPTY)
 public class Op {
+
+  // 0 length white space
+  static final String EMBED = String.valueOf((char) 0x200b);
+
   @JsonProperty()
-  private Object  insert;
+  private String  insert;
   @JsonProperty()
   private Integer delete;
   @JsonProperty()
@@ -37,13 +41,47 @@ public class Op {
   }
 
   @JsonIgnore
-  public boolean isStringInsert() {
-    return isInsert() && insert instanceof String;
+  public boolean isTextInsert() {
+    return isInsert() && !EMBED.equals(insert);
   }
 
   @JsonIgnore
   public boolean isRetain() {
     return type().equals(RETAIN);
+  }
+
+  public static Op insert(String arg) {
+    return Op.insert(arg, null);
+  }
+
+  public static Op insert(String arg, AttributeMap attributes) {
+    Op newOp = new Op();
+    if (attributes != null && attributes.size() > 0)
+      newOp.attributes = attributes;
+    newOp.insert = arg;
+    return newOp;
+  }
+
+  public static Op retain(int length) {
+    return Op.retain(length, null);
+  }
+
+  public static Op retain(int length, AttributeMap attributes) {
+    if (length <= 0)
+      throw new IllegalArgumentException("Length should be greater than 0");
+    Op newOp = new Op();
+    if (attributes != null && attributes.size() > 0)
+      newOp.attributes = attributes;
+    newOp.retain = length;
+    return newOp;
+  }
+
+  public static Op delete(int length) {
+    if (length <= 0)
+      throw new IllegalArgumentException("Length should be greater than 0");
+    Op newOp = new Op();
+    newOp.delete = length;
+    return newOp;
   }
 
   @JsonGetter("type")
@@ -75,9 +113,7 @@ public class Op {
       return delete;
     if (type().equals(RETAIN))
       return retain;
-    if (insert instanceof String)
-      return ((String) insert).length();
-    return 1;
+    return insert.length();
   }
 
   public AttributeMap attributes() {
@@ -86,8 +122,8 @@ public class Op {
     return attributes != null ? attributes.copy() : null;
   }
 
-  public Object arg() {
-    if (type().equals(Type.INSERT))
+  public String arg() {
+    if (Type.INSERT.equals(type()))
       return insert;
     throw new UnsupportedOperationException("Only insert op has an argument");
   }
@@ -136,42 +172,8 @@ public class Op {
     INSERT, DELETE, RETAIN
   }
 
-  static Op retain(int length) {
-    return Op.retain(length, null);
-  }
-
   static Op retainUntilEnd() {
     return Op.retain(Integer.MAX_VALUE);
-  }
-
-  static Op insert(Object arg) {
-    return Op.insert(arg, null);
-  }
-
-  static Op retain(int length, AttributeMap attributes) {
-    if (length <= 0)
-      throw new IllegalArgumentException("Length should be greater than 0");
-    Op newOp = new Op();
-    if (attributes != null && attributes.size() > 0)
-      newOp.attributes = attributes;
-    newOp.retain = length;
-    return newOp;
-  }
-
-  static Op insert(Object arg, AttributeMap attributes) {
-    Op newOp = new Op();
-    if (attributes != null && attributes.size() > 0)
-      newOp.attributes = attributes;
-    newOp.insert = arg;
-    return newOp;
-  }
-
-  static Op delete(int length) {
-    if (length <= 0)
-      throw new IllegalArgumentException("Length should be greater than 0");
-    Op newOp = new Op();
-    newOp.delete = length;
-    return newOp;
   }
 }
 

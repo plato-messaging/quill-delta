@@ -12,7 +12,7 @@ import static java.util.stream.Collectors.toList;
 @JsonInclude(value = NON_EMPTY)
 public class OpList extends ArrayList<Op> {
 
-  OpList(List<Op> ops) {
+  public OpList(List<Op> ops) {
     super(ops);
   }
 
@@ -69,7 +69,7 @@ public class OpList extends ArrayList<Op> {
         Op retOp;
         if (nextOp.isRetain())
           retOp = Op.retain(length, nextOp.attributes());
-        else if (nextOp.isStringInsert())
+        else if (nextOp.isTextInsert())
           retOp =
             Op.insert(nextOp.argAsString().substring(offset, offset + length), nextOp.attributes());
         else
