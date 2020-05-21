@@ -129,9 +129,7 @@ public class Op {
   }
 
   public String argAsString() {
-    if (!(arg() instanceof String))
-      throw new ClassCastException("Argument is not of type String");
-    return (String) insert;
+    return insert;
   }
 
   public boolean hasAttributes() {

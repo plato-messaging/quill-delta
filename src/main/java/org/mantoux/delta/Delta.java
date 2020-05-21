@@ -306,6 +306,16 @@ public class Delta {
     return delta;
   }
 
+  public String plainText() {
+    StringBuilder builder = new StringBuilder();
+    for (Op op : ops) {
+      if (op.isInsert()) {
+        builder.append(op.argAsString());
+      }
+    }
+    return builder.toString();
+  }
+
   @Override
   public int hashCode() {
     return Objects.hash(ops);
