@@ -1,6 +1,5 @@
 package org.mantoux.delta;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -84,7 +83,6 @@ public class Op {
     return newOp;
   }
 
-  @JsonGetter("type")
   public Type type() {
     if (insert != null)
       return Type.INSERT;
