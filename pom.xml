@@ -14,7 +14,7 @@
 
     <groupId>org.mantoux</groupId>
     <artifactId>quill-delta</artifactId>
-    <version>1.5</version>
+    <version>1.5.1</version>
 
     <licenses>
         <license>

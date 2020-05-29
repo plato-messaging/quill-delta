@@ -16,29 +16,25 @@ public class AttributeMap extends HashMap<String, Object> {
     super(input);
   }
 
-  public AttributeMap copy() {
-    return new AttributeMap(this);
-  }
-
-  static AttributeMap of(String key, Object value) {
+  public static AttributeMap of(String key, Object value) {
     Map<String, Object> temp = new HashMap<>();
     temp.put(key, value);
     return new AttributeMap(temp);
   }
 
-  static AttributeMap of(String key0, Object value0, String key1, Object value1) {
+  public static AttributeMap of(String key0, Object value0, String key1, Object value1) {
     Map<String, Object> temp = new HashMap<>();
     temp.put(key0, value0);
     temp.put(key1, value1);
     return new AttributeMap(temp);
   }
 
-  static AttributeMap of(String key0,
-                         Object value0,
-                         String key1,
-                         Object value1,
-                         String key2,
-                         Object value2) {
+  public static AttributeMap of(String key0,
+                                Object value0,
+                                String key1,
+                                Object value1,
+                                String key2,
+                                Object value2) {
     Map<String, Object> temp = new HashMap<>();
     temp.put(key0, value0);
     temp.put(key1, value1);
@@ -46,20 +42,24 @@ public class AttributeMap extends HashMap<String, Object> {
     return new AttributeMap(temp);
   }
 
-  static AttributeMap of(String key0,
-                         Object value0,
-                         String key1,
-                         Object value1,
-                         String key2,
-                         Object value2,
-                         String key3,
-                         Object value3) {
+  public static AttributeMap of(String key0,
+                                Object value0,
+                                String key1,
+                                Object value1,
+                                String key2,
+                                Object value2,
+                                String key3,
+                                Object value3) {
     Map<String, Object> temp = new HashMap<>();
     temp.put(key0, value0);
     temp.put(key1, value1);
     temp.put(key2, value2);
     temp.put(key3, value3);
     return new AttributeMap(temp);
+  }
+
+  public AttributeMap copy() {
+    return new AttributeMap(this);
   }
 
   /**
