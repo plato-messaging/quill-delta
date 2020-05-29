@@ -12,7 +12,7 @@ public class AttributeMap extends HashMap<String, Object> {
     super();
   }
 
-  private AttributeMap(Map<String, Object> input) {
+  public AttributeMap(Map<String, Object> input) {
     super(input);
   }
 
