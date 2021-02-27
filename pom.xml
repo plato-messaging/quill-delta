@@ -14,7 +14,7 @@
 
     <groupId>org.mantoux</groupId>
     <artifactId>quill-delta</artifactId>
-    <version>1.5.1</version>
+    <version>1.5.2</version>
 
     <licenses>
         <license>
@@ -55,7 +55,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.10.1</version>
+            <version>2.12.1</version>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
         <dependency>
