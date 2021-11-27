@@ -1,33 +1,75 @@
 package org.mantoux.delta;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static org.mantoux.delta.Op.Type.DELETE;
+import static org.mantoux.delta.Op.Type.RETAIN;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.Objects;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static org.mantoux.delta.Op.Type.DELETE;
-import static org.mantoux.delta.Op.Type.RETAIN;
-
 @JsonInclude(value = NON_EMPTY)
+@JsonDeserialize(using = OpDeserializer.class)
 public class Op {
 
   // 0 length white space
+  // placeholder for embedded in diff (no implementation so far)
   static final String EMBED = String.valueOf((char) 0x200b);
 
-  @JsonProperty()
-  private String  insert;
-  @JsonProperty()
-  private Integer delete;
-  @JsonProperty()
-  private Integer retain;
+  @JsonProperty() private Object insert;
+  @JsonProperty() private Integer delete;
+  @JsonProperty() private Integer retain;
+  @JsonProperty() private AttributeMap attributes;
 
-  @JsonProperty()
-  private AttributeMap attributes;
+  public static Op insert(Object arg) {
+    if (arg instanceof String) {
+      return Op.insert(arg, null);
+    }
+    var newOp = new Op();
+    newOp.insert = arg;
+    return newOp;
+  }
+
+  public static Op insert(Object arg, AttributeMap attributes) {
+    Op newOp = new Op();
+    if (attributes != null && attributes.size() > 0) {
+      if (arg instanceof String) {
+        newOp.attributes = attributes;
+      } else {
+        throw new IllegalArgumentException("Cannot insert object with attributes");
+      }
+    }
+    newOp.insert = arg;
+    return newOp;
+  }
+
+  public static Op retain(int length) {
+    return Op.retain(length, null);
+  }
+
+  public static Op retain(int length, AttributeMap attributes) {
+    if (length <= 0) throw new IllegalArgumentException("Length should be greater than 0");
+    Op newOp = new Op();
+    if (attributes != null && attributes.size() > 0) newOp.attributes = attributes;
+    newOp.retain = length;
+    return newOp;
+  }
+
+  public static Op delete(int length) {
+    if (length <= 0) throw new IllegalArgumentException("Length should be greater than 0");
+    Op newOp = new Op();
+    newOp.delete = length;
+    return newOp;
+  }
+
+  static Op retainUntilEnd() {
+    return Op.retain(Integer.MAX_VALUE);
+  }
 
   @JsonIgnore
   public boolean isDelete() {
@@ -41,7 +83,7 @@ public class Op {
 
   @JsonIgnore
   public boolean isTextInsert() {
-    return isInsert() && !EMBED.equals(insert);
+    return isInsert() && insert instanceof String;
   }
 
   @JsonIgnore
@@ -49,47 +91,10 @@ public class Op {
     return type().equals(RETAIN);
   }
 
-  public static Op insert(String arg) {
-    return Op.insert(arg, null);
-  }
-
-  public static Op insert(String arg, AttributeMap attributes) {
-    Op newOp = new Op();
-    if (attributes != null && attributes.size() > 0)
-      newOp.attributes = attributes;
-    newOp.insert = arg;
-    return newOp;
-  }
-
-  public static Op retain(int length) {
-    return Op.retain(length, null);
-  }
-
-  public static Op retain(int length, AttributeMap attributes) {
-    if (length <= 0)
-      throw new IllegalArgumentException("Length should be greater than 0");
-    Op newOp = new Op();
-    if (attributes != null && attributes.size() > 0)
-      newOp.attributes = attributes;
-    newOp.retain = length;
-    return newOp;
-  }
-
-  public static Op delete(int length) {
-    if (length <= 0)
-      throw new IllegalArgumentException("Length should be greater than 0");
-    Op newOp = new Op();
-    newOp.delete = length;
-    return newOp;
-  }
-
   public Type type() {
-    if (insert != null)
-      return Type.INSERT;
-    if (delete != null)
-      return DELETE;
-    if (retain != null)
-      return RETAIN;
+    if (insert != null) return Type.INSERT;
+    if (delete != null) return DELETE;
+    if (retain != null) return RETAIN;
     throw new IllegalStateException("Op has no insert, delete or retain");
   }
 
@@ -107,32 +112,28 @@ public class Op {
   }
 
   public int length() {
-    if (type().equals(DELETE))
-      return delete;
-    if (type().equals(RETAIN))
-      return retain;
-    return insert.length();
+    if (type().equals(DELETE)) return delete;
+    if (type().equals(RETAIN)) return retain;
+    return insert instanceof String ? ((String) insert).length() : 1;
   }
 
   public AttributeMap attributes() {
-    if (type().equals(DELETE))
-      return null;
+    if (type().equals(DELETE)) return null;
     return attributes != null ? attributes.copy() : null;
   }
 
-  public String arg() {
-    if (Type.INSERT.equals(type()))
-      return insert;
+  public Object arg() {
+    if (Type.INSERT.equals(type())) return insert;
     throw new UnsupportedOperationException("Only insert op has an argument");
   }
 
   public String argAsString() {
-    return insert;
+    assert (insert instanceof String);
+    return (String) insert;
   }
 
   public boolean hasAttributes() {
-    if (isDelete())
-      return false;
+    if (isDelete()) return false;
     return attributes != null;
   }
 
@@ -143,14 +144,13 @@ public class Op {
 
   @Override
   public boolean equals(Object o) {
-    if (this == o)
-      return true;
-    if (o == null || getClass() != o.getClass())
-      return false;
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
     Op op = (Op) o;
-    return Objects.equals(insert, op.insert) && Objects.equals(delete, op.delete) && Objects.equals(
-      retain,
-      op.retain) && Objects.equals(attributes, op.attributes);
+    return Objects.equals(insert, op.insert)
+        && Objects.equals(delete, op.delete)
+        && Objects.equals(retain, op.retain)
+        && Objects.equals(attributes, op.attributes);
   }
 
   @Override
@@ -165,11 +165,8 @@ public class Op {
   }
 
   public enum Type {
-    INSERT, DELETE, RETAIN
-  }
-
-  static Op retainUntilEnd() {
-    return Op.retain(Integer.MAX_VALUE);
+    INSERT,
+    DELETE,
+    RETAIN
   }
 }
-

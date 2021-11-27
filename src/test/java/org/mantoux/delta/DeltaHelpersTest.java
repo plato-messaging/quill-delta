@@ -1,11 +1,11 @@
 package org.mantoux.delta;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mantoux.delta.AttributeMap.of;
+
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mantoux.delta.AttributeMap.of;
 
 @DisplayName("Helpers")
 class DeltaHelpersTest {
@@ -40,7 +40,6 @@ class DeltaHelpersTest {
       assertEquals(original, delta);
     }
   }
-
 
   @Nested
   public class Chop {

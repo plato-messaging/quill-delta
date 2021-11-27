@@ -1,11 +1,11 @@
 package org.mantoux.delta;
 
+import static org.junit.jupiter.api.Assertions.assertNull;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 @DisplayName("Attributes")
 class AttributeMapTest {
@@ -32,20 +32,23 @@ class AttributeMapTest {
 
     @Test
     public void missingElement() {
-      Assertions.assertEquals(AttributeMap.of("bold", true, "italic", true, "color", "red"),
-                              AttributeMap.compose(attributes, AttributeMap.of("italic", true)));
+      Assertions.assertEquals(
+          AttributeMap.of("bold", true, "italic", true, "color", "red"),
+          AttributeMap.compose(attributes, AttributeMap.of("italic", true)));
     }
 
     @Test
     public void overrideElement() {
-      Assertions.assertEquals(AttributeMap.of("bold", true, "color", "blue"),
-                              AttributeMap.compose(attributes, AttributeMap.of("color", "blue")));
+      Assertions.assertEquals(
+          AttributeMap.of("bold", true, "color", "blue"),
+          AttributeMap.compose(attributes, AttributeMap.of("color", "blue")));
     }
 
     @Test
     public void removeElement() {
-      Assertions.assertEquals(AttributeMap.of("color", "red"),
-                              AttributeMap.compose(attributes, AttributeMap.of("bold", null)));
+      Assertions.assertEquals(
+          AttributeMap.of("color", "red"),
+          AttributeMap.compose(attributes, AttributeMap.of("bold", null)));
     }
 
     @Test
@@ -55,11 +58,10 @@ class AttributeMapTest {
 
     @Test
     public void removeMissing() {
-      Assertions.assertEquals(attributes,
-                              AttributeMap.compose(attributes, AttributeMap.of("italic", null)));
+      Assertions.assertEquals(
+          attributes, AttributeMap.compose(attributes, AttributeMap.of("italic", null)));
     }
   }
-
 
   @Nested
   public class Invert {
@@ -113,18 +115,17 @@ class AttributeMapTest {
     @Test
     public void combined() {
       AttributeMap attributes =
-        AttributeMap.of("bold", true, "italic", null, "color", "red", "size", "12px");
+          AttributeMap.of("bold", true, "italic", null, "color", "red", "size", "12px");
       AttributeMap base =
-        AttributeMap.of("font", "serif", "italic", true, "color", "blue", "size", "12px");
+          AttributeMap.of("font", "serif", "italic", true, "color", "blue", "size", "12px");
       AttributeMap expected = AttributeMap.of("bold", null, "italic", true, "color", "blue");
       Assertions.assertEquals(expected, AttributeMap.invert(attributes, base));
     }
   }
 
-
   @Nested
   public class Transform {
-    AttributeMap left  = AttributeMap.of("bold", true, "color", "red", "font", null);
+    AttributeMap left = AttributeMap.of("bold", true, "color", "red", "font", null);
     AttributeMap right = AttributeMap.of("color", "blue", "font", "serif", "italic", true);
 
     @Test
@@ -144,8 +145,8 @@ class AttributeMapTest {
 
     @Test
     public void withPriority() {
-      Assertions.assertEquals(AttributeMap.of("italic", true),
-                              AttributeMap.transform(left, right, true));
+      Assertions.assertEquals(
+          AttributeMap.of("italic", true), AttributeMap.transform(left, right, true));
     }
 
     @Test
@@ -153,7 +154,6 @@ class AttributeMapTest {
       Assertions.assertEquals(right, AttributeMap.transform(left, right, false));
     }
   }
-
 
   @Nested
   public class Diff {
@@ -166,8 +166,8 @@ class AttributeMapTest {
 
     @Test
     public void rightNull() {
-      Assertions.assertEquals(AttributeMap.of("bold", null, "color", null),
-                              AttributeMap.diff(format, null));
+      Assertions.assertEquals(
+          AttributeMap.of("bold", null, "color", null), AttributeMap.diff(format, null));
     }
 
     @Test
@@ -190,9 +190,8 @@ class AttributeMapTest {
     @Test
     public void overrideFormat() {
       AttributeMap override = AttributeMap.of("bold", true, "color", "blue");
-      Assertions.assertEquals(AttributeMap.of("color", "blue"),
-                              AttributeMap.diff(format, override));
+      Assertions.assertEquals(
+          AttributeMap.of("color", "blue"), AttributeMap.diff(format, override));
     }
   }
-
 }

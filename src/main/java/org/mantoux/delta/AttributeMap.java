@@ -1,6 +1,10 @@
 package org.mantoux.delta;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 public class AttributeMap extends HashMap<String, Object> {
 
@@ -29,12 +33,8 @@ public class AttributeMap extends HashMap<String, Object> {
     return new AttributeMap(temp);
   }
 
-  public static AttributeMap of(String key0,
-                                Object value0,
-                                String key1,
-                                Object value1,
-                                String key2,
-                                Object value2) {
+  public static AttributeMap of(
+      String key0, Object value0, String key1, Object value1, String key2, Object value2) {
     Map<String, Object> temp = new HashMap<>();
     temp.put(key0, value0);
     temp.put(key1, value1);
@@ -42,14 +42,15 @@ public class AttributeMap extends HashMap<String, Object> {
     return new AttributeMap(temp);
   }
 
-  public static AttributeMap of(String key0,
-                                Object value0,
-                                String key1,
-                                Object value1,
-                                String key2,
-                                Object value2,
-                                String key3,
-                                Object value3) {
+  public static AttributeMap of(
+      String key0,
+      Object value0,
+      String key1,
+      Object value1,
+      String key2,
+      Object value2,
+      String key3,
+      Object value3) {
     Map<String, Object> temp = new HashMap<>();
     temp.put(key0, value0);
     temp.put(key1, value1);
@@ -58,15 +59,11 @@ public class AttributeMap extends HashMap<String, Object> {
     return new AttributeMap(temp);
   }
 
-  public AttributeMap copy() {
-    return new AttributeMap(this);
-  }
-
   /**
    * Union of attributes, where conflict are overriden by second argument
    *
-   * @param a        an attribute map
-   * @param b        an attribute map
+   * @param a an attribute map
+   * @param b an attribute map
    * @param keepNull if inputB has {@code null} key, keep it
    * @return the composed attribute map
    */
@@ -76,16 +73,15 @@ public class AttributeMap extends HashMap<String, Object> {
     AttributeMap attributes = new AttributeMap(_b);
     if (!keepNull) {
       Set<String> keysToRemove = new HashSet<>();
-      attributes.forEach((key, value) -> {
-        if (value == null)
-          keysToRemove.add(key);
-      });
+      attributes.forEach(
+          (key, value) -> {
+            if (value == null) keysToRemove.add(key);
+          });
       keysToRemove.forEach(attributes::remove);
     }
 
     for (String key : _a.keySet()) {
-      if (_a.get(key) != null && !_b.containsKey(key))
-        attributes.put(key, _a.get(key));
+      if (_a.get(key) != null && !_b.containsKey(key)) attributes.put(key, _a.get(key));
     }
 
     return attributes.isEmpty() ? null : new AttributeMap(attributes);
@@ -107,8 +103,7 @@ public class AttributeMap extends HashMap<String, Object> {
     Set<String> keys = new HashSet<>(_a.keySet());
     keys.addAll(_b.keySet());
     for (String k : keys) {
-      if (!Objects.equals(_a.get(k), _b.get(k)))
-        attributes.put(k, _b.get(k));
+      if (!Objects.equals(_a.get(k), _b.get(k))) attributes.put(k, _b.get(k));
     }
     return attributes.isEmpty() ? null : attributes;
   }
@@ -138,18 +133,17 @@ public class AttributeMap extends HashMap<String, Object> {
   }
 
   static AttributeMap transform(AttributeMap a, AttributeMap b, boolean priority) {
-    if (a == null)
-      return b;
-    if (b == null)
-      return null;
-    if (!priority)
-      return b; // b simply overwrites us without priority
+    if (a == null) return b;
+    if (b == null) return null;
+    if (!priority) return b; // b simply overwrites us without priority
     AttributeMap attributes = new AttributeMap();
     for (String k : b.keySet()) {
-      if (!a.containsKey(k))
-        attributes.put(k, b.get(k));
+      if (!a.containsKey(k)) attributes.put(k, b.get(k));
     }
     return attributes.isEmpty() ? null : attributes;
   }
 
+  public AttributeMap copy() {
+    return new AttributeMap(this);
+  }
 }

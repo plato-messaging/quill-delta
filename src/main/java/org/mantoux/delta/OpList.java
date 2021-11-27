@@ -1,13 +1,12 @@
 package org.mantoux.delta;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static java.util.stream.Collectors.toList;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
-import static java.util.stream.Collectors.toList;
 
 @JsonInclude(value = NON_EMPTY)
 public class OpList extends ArrayList<Op> {
@@ -24,8 +23,8 @@ public class OpList extends ArrayList<Op> {
     add(0, element);
   }
 
-  public Op removeLast() {
-    return remove(size() - 1);
+  public void removeLast() {
+    remove(size() - 1);
   }
 
   public OpList filter(Predicate<Op> predicate) {
@@ -41,7 +40,7 @@ public class OpList extends ArrayList<Op> {
 
     private final OpList ops;
 
-    private int index  = 0;
+    private int index = 0;
     private int offset = 0;
 
     Iterator(OpList ops) {
@@ -49,8 +48,7 @@ public class OpList extends ArrayList<Op> {
     }
 
     public Op next(int length) {
-      if (index >= ops.size())
-        return Op.retain(Integer.MAX_VALUE, null);
+      if (index >= ops.size()) return Op.retain(Integer.MAX_VALUE, null);
 
       final Op nextOp = ops.get(index);
       final int offset = this.offset;
@@ -60,47 +58,42 @@ public class OpList extends ArrayList<Op> {
         length = opLength - offset;
         this.index += 1;
         this.offset = 0;
-      } else
+      } else {
         this.offset += length;
+      }
 
-      if (nextOp.isDelete())
+      if (nextOp.isDelete()) {
         return Op.delete(length);
-      else {
+      } else {
         Op retOp;
-        if (nextOp.isRetain())
-          retOp = Op.retain(length, nextOp.attributes());
+        if (nextOp.isRetain()) retOp = Op.retain(length, nextOp.attributes());
         else if (nextOp.isTextInsert())
           retOp =
-            Op.insert(nextOp.argAsString().substring(offset, offset + length), nextOp.attributes());
-        else
-          retOp = Op.insert(nextOp.arg(), nextOp.attributes());
+              Op.insert(
+                  nextOp.argAsString().substring(offset, offset + length), nextOp.attributes());
+        else retOp = Op.insert(nextOp.arg(), nextOp.attributes());
         return retOp;
       }
     }
 
     public Op peek() {
-      if (index >= ops.size())
-        return null;
+      if (index >= ops.size()) return null;
       return ops.get(index);
     }
 
     public int peekLength() {
-      if (index >= ops.size())
-        return Integer.MAX_VALUE;
+      if (index >= ops.size()) return Integer.MAX_VALUE;
       return ops.get(index).length() - offset;
     }
 
     public Op.Type peekType() {
-      if (index >= ops.size())
-        return Op.Type.RETAIN;
+      if (index >= ops.size()) return Op.Type.RETAIN;
       return ops.get(index).type();
     }
 
     public OpList rest() {
-      if (!hasNext())
-        return new OpList();
-      if (offset == 0)
-        return new OpList(ops.subList(index, ops.size()));
+      if (!hasNext()) return new OpList();
+      if (offset == 0) return new OpList(ops.subList(index, ops.size()));
       final int offset = this.offset;
       final int index = this.index;
       final Op next = next();

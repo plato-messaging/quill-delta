@@ -1,11 +1,11 @@
 package org.mantoux.delta;
 
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mantoux.delta.AttributeMap.of;
 import static org.mantoux.delta.Op.EMBED;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 @DisplayName("Delta composing")
 public class DeltaComposeTest {
@@ -100,7 +100,7 @@ public class DeltaComposeTest {
     var a = new Delta().insert(EMBED, of("src", "https://plato.mantoux.org"));
     var b = new Delta().retain(1, of("alt", "Plato"));
     var expected =
-      new Delta().insert(EMBED, of("src", "https://plato.mantoux.org", "alt", "Plato"));
+        new Delta().insert(EMBED, of("src", "https://plato.mantoux.org", "alt", "Plato"));
     assertEquals(expected, a.compose(b));
   }
 
@@ -157,31 +157,41 @@ public class DeltaComposeTest {
   @Test
   public void retainStartOptimization() {
     var a =
-      new Delta().insert("A", of("bold", true)).insert("B").insert("C", of("bold", true)).delete(1);
+        new Delta()
+            .insert("A", of("bold", true))
+            .insert("B")
+            .insert("C", of("bold", true))
+            .delete(1);
     var b = new Delta().retain(3).insert("D");
-    var expected = new Delta().insert("A", of("bold", true))
-                              .insert("B")
-                              .insert("C", of("bold", true))
-                              .insert("D")
-                              .delete(1);
+    var expected =
+        new Delta()
+            .insert("A", of("bold", true))
+            .insert("B")
+            .insert("C", of("bold", true))
+            .insert("D")
+            .delete(1);
     assertEquals(expected, a.compose(b));
   }
 
   @Test
   public void retainStartOptimizationSplit() {
-    var a = new Delta().insert("A", of("bold", true))
-                       .insert("B")
-                       .insert("C", of("bold", true))
-                       .retain(5)
-                       .delete(1);
+    var a =
+        new Delta()
+            .insert("A", of("bold", true))
+            .insert("B")
+            .insert("C", of("bold", true))
+            .retain(5)
+            .delete(1);
     var b = new Delta().retain(4).insert("D");
-    var expected = new Delta().insert("A", of("bold", true))
-                              .insert("B")
-                              .insert("C", of("bold", true))
-                              .retain(1)
-                              .insert("D")
-                              .retain(4)
-                              .delete(1);
+    var expected =
+        new Delta()
+            .insert("A", of("bold", true))
+            .insert("B")
+            .insert("C", of("bold", true))
+            .retain(1)
+            .insert("D")
+            .retain(4)
+            .delete(1);
     assertEquals(expected, a.compose(b));
   }
 
@@ -195,18 +205,21 @@ public class DeltaComposeTest {
 
   @Test
   public void retainEndOptimizationJoin() {
-    var a = new Delta().insert("A", of("bold", true))
-                       .insert("B")
-                       .insert("C", of("bold", true))
-                       .insert("D")
-                       .insert("E", of("bold", true))
-                       .insert("F");
+    var a =
+        new Delta()
+            .insert("A", of("bold", true))
+            .insert("B")
+            .insert("C", of("bold", true))
+            .insert("D")
+            .insert("E", of("bold", true))
+            .insert("F");
     var b = new Delta().retain(1).delete(1);
-    var expected = new Delta().insert("AC", of("bold", true))
-                              .insert("D")
-                              .insert("E", of("bold", true))
-                              .insert("F");
+    var expected =
+        new Delta()
+            .insert("AC", of("bold", true))
+            .insert("D")
+            .insert("E", of("bold", true))
+            .insert("F");
     assertEquals(expected, a.compose(b));
   }
-
 }

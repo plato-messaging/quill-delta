@@ -1,12 +1,14 @@
 package org.mantoux.delta;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mantoux.delta.AttributeMap.of;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mantoux.delta.AttributeMap.of;
 
 @DisplayName("Op")
 class OpTest {
@@ -34,17 +36,18 @@ class OpTest {
     }
   }
 
-
   @Nested
   public class iterator {
     Delta delta;
 
     @BeforeEach
     public void beforeEach() {
-      delta = new Delta().insert("Hello", of("bold", true))
-                         .retain(3)
-                         .insert("2", of("src", "https://plato.mantoux.org"))
-                         .delete(4);
+      delta =
+          new Delta()
+              .insert("Hello", of("bold", true))
+              .retain(3)
+              .insert("2", of("src", "https://plato.mantoux.org"))
+              .delete(4);
     }
 
     @Test

@@ -1,13 +1,13 @@
 package org.mantoux.delta;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mantoux.delta.Op.EMBED;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mantoux.delta.Op.EMBED;
 
 @DisplayName("Delta building")
 class DeltaBuilderTest {
@@ -55,7 +55,6 @@ class DeltaBuilderTest {
       assertEquals(ops, copy.ops);
     }
   }
-
 
   @Nested
   public class Insert {
@@ -133,7 +132,6 @@ class DeltaBuilderTest {
     }
   }
 
-
   @Nested
   public class Delete {
 
@@ -150,7 +148,6 @@ class DeltaBuilderTest {
       assertEquals(Op.delete(1), delta.ops.get(0));
     }
   }
-
 
   @Nested
   public class Retain {
@@ -184,11 +181,10 @@ class DeltaBuilderTest {
 
     @Test
     public void retainEmptyAttributeWithDelete() {
-      var delta = new Delta().retain(2, new AttributeMap()).delete(1); //Delete prevents chop
+      var delta = new Delta().retain(2, new AttributeMap()).delete(1); // Delete prevents chop
       assertEquals(new Delta().retain(2).delete(1), delta);
     }
   }
-
 
   @Nested
   public class Push {
@@ -253,14 +249,4 @@ class DeltaBuilderTest {
       assertEquals(2, delta.ops.size());
     }
   }
-
 }
-
-
-
-
-
-
-
-
-
