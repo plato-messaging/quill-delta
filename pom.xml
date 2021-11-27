@@ -20,7 +20,7 @@
         <configuration>
           <maxmemory>512</maxmemory>
           <minmemory>128m</minmemory>
-          <source>8</source>
+          <source>17</source>
         </configuration>
         <executions>
           <execution>
@@ -77,6 +77,11 @@
         <groupId>org.apache.maven.plugins</groupId>
         <version>3.0.1</version>
       </plugin>
+      <plugin>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <groupId>org.apache.maven.plugins</groupId>
+        <version>2.22.1</version>
+      </plugin>
     </plugins>
   </build>
 
@@ -86,10 +91,9 @@
       <groupId>com.fasterxml.jackson.core</groupId>
       <version>2.13.0</version>
     </dependency>
-    <!-- https://mvnrepository.com/artifact/org.junit.jupiter/junit-jupiter-api -->
     <dependency>
-      <artifactId>junit-jupiter-api</artifactId>
       <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
       <scope>test</scope>
       <version>5.8.1</version>
     </dependency>
