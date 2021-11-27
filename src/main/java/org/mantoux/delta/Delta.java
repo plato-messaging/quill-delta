@@ -297,8 +297,10 @@ public class Delta {
   public String plainText() {
     StringBuilder builder = new StringBuilder();
     for (Op op : ops) {
-      if (op.isInsert()) {
+      if (op.isTextInsert()) {
         builder.append(op.argAsString());
+      } else {
+        builder.append("\n");
       }
     }
     return builder.toString();
