@@ -221,7 +221,6 @@ public class Delta {
   public void eachLine(BiFunction<Delta, AttributeMap, Boolean> predicate, String newLine) {
     final OpList.Iterator it = ops.iterator();
     Delta line = new Delta();
-    int i = 0;
     while (it.hasNext()) {
       if (it.peekType() != INSERT) return;
       final Op thisOp = it.peek();
@@ -232,7 +231,6 @@ public class Delta {
       else if (index > 0) line.push(it.next(index));
       else {
         if (!predicate.apply(line, it.next(1).attributes())) return;
-        i++;
         line = new Delta();
       }
     }
