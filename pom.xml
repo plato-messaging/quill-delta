@@ -42,7 +42,7 @@
         </configuration>
         <extensions>true</extensions>
         <groupId>org.sonatype.plugins</groupId>
-        <version>1.6.8</version>
+        <version>1.6.13</version>
       </plugin>
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
