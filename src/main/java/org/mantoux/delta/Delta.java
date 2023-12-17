@@ -1,6 +1,6 @@
 package org.mantoux.delta;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static org.mantoux.delta.Op.Type.DELETE;
 import static org.mantoux.delta.Op.Type.INSERT;
 
@@ -18,7 +18,7 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-@JsonInclude(value = NON_EMPTY)
+@JsonInclude(value = NON_NULL)
 public class Delta {
   @JsonProperty("ops")
   final OpList ops;

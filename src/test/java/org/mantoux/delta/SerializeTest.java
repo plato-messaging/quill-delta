@@ -105,4 +105,15 @@ public class SerializeTest {
     assertEquals(act, exp);
   }
 
+  @Test
+  void deserializeEmptyDelta() throws Exception {
+    var json = """
+        {
+          "ops": []
+        }
+        """;
+    var act = mapper.readValue(json, Delta.class);
+    var exp = new Delta();
+    assertEquals(act, exp);
+  }
 }
