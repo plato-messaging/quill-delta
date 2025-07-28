@@ -37,7 +37,7 @@ public class Op {
 
   public static Op insert(Object arg, AttributeMap attributes) {
     Op newOp = new Op();
-    if (attributes != null && attributes.size() > 0) {
+    if (attributes != null && !attributes.isEmpty()) {
       if (arg instanceof String) {
         newOp.attributes = attributes;
       } else {
@@ -55,7 +55,7 @@ public class Op {
   public static Op retain(int length, AttributeMap attributes) {
     if (length <= 0) throw new IllegalArgumentException("Length should be greater than 0");
     Op newOp = new Op();
-    if (attributes != null && attributes.size() > 0) newOp.attributes = attributes;
+    if (attributes != null && !attributes.isEmpty()) newOp.attributes = attributes;
     newOp.retain = length;
     return newOp;
   }
@@ -99,16 +99,11 @@ public class Op {
   }
 
   public Op copy() {
-    switch (type()) {
-      case RETAIN:
-        return Op.retain(retain, attributes != null ? attributes.copy() : null);
-      case DELETE:
-        return Op.delete(delete);
-      case INSERT:
-        return Op.insert(insert, attributes != null ? attributes.copy() : null);
-      default:
-        throw new IllegalStateException("Op has no insert, delete or retain");
-    }
+    return switch (type()) {
+      case RETAIN -> Op.retain(retain, attributes != null ? attributes.copy() : null);
+      case DELETE -> Op.delete(delete);
+      case INSERT -> Op.insert(insert, attributes != null ? attributes.copy() : null);
+    };
   }
 
   public int length() {

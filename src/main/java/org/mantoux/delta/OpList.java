@@ -23,8 +23,8 @@ public class OpList extends ArrayList<Op> {
     add(0, element);
   }
 
-  public void removeLast() {
-    remove(size() - 1);
+  public Op removeLast() {
+    return remove(size() - 1);
   }
 
   public OpList filter(Predicate<Op> predicate) {
@@ -36,7 +36,7 @@ public class OpList extends ArrayList<Op> {
     return new Iterator(this);
   }
 
-  static class Iterator implements java.util.Iterator<Op> {
+  public static class Iterator implements java.util.Iterator<Op> {
 
     private final OpList ops;
 

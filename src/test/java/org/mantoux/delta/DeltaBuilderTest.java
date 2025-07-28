@@ -245,7 +245,7 @@ class DeltaBuilderTest {
     @Test
     public void pushConsecutiveEmbedsWithMatchingAttributes() {
       var delta = new Delta().insert(EMBED, AttributeMap.of("alt", "Description"));
-      delta.push(Op.insert(EMBED, AttributeMap.of("alt", "Plato")));
+      delta.push(Op.insert(EMBED, AttributeMap.of("alt", "Some Other Description")));
       assertEquals(2, delta.ops.size());
     }
   }
