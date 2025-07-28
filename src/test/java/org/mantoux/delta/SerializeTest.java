@@ -38,10 +38,11 @@ public class SerializeTest {
             }
             """;
     var act = mapper.readValue(json, Delta.class);
-    var exp = new Delta()
-        .retain(1033, AttributeMap.of("bold", true, "italic", false))
-        .insert(Map.of("_type", "hr", "_inline", false))
-        .delete(1);
+    var exp =
+        new Delta()
+            .retain(1033, AttributeMap.of("bold", true, "italic", false))
+            .insert(Map.of("_type", "hr", "_inline", false))
+            .delete(1);
     assertEquals(exp, act);
   }
 
@@ -72,10 +73,11 @@ public class SerializeTest {
             }
             """;
     var act = mapper.readValue(json, Delta.class);
-    var exp = new Delta()
-        .retain(1033, AttributeMap.of("bold", true, "italic", false))
-        .insert("coucou", AttributeMap.of("bold", true, "italic", false))
-        .delete(1);
+    var exp =
+        new Delta()
+            .retain(1033, AttributeMap.of("bold", true, "italic", false))
+            .insert("coucou", AttributeMap.of("bold", true, "italic", false))
+            .delete(1);
     assertEquals(act, exp);
   }
 
@@ -98,16 +100,14 @@ public class SerializeTest {
             }
             """;
     var act = mapper.readValue(json, Delta.class);
-    var exp = new Delta()
-        .retain(1033)
-        .insert("coucou")
-        .delete(1);
+    var exp = new Delta().retain(1033).insert("coucou").delete(1);
     assertEquals(act, exp);
   }
 
   @Test
   void deserializeEmptyDelta() throws Exception {
-    var json = """
+    var json =
+        """
         {
           "ops": []
         }

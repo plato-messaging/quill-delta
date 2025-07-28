@@ -116,7 +116,7 @@ public class Delta {
 
   public Delta chop() {
     if (ops.isEmpty()) return this;
-    Op lastOp = ops.get(ops.size() - 1);
+    Op lastOp = ops.getLast();
     if (lastOp.isRetain() && lastOp.attributes() == null) {
       ops.removeLast();
     }
@@ -206,7 +206,7 @@ public class Delta {
           else newOp = Op.insert(thisOp.arg(), attributes);
           delta.push(newOp);
           // Optimization if rest of other is just retain
-          if (!otherIt.hasNext() && delta.ops.get(delta.ops.size() - 1).equals(newOp)) {
+          if (!otherIt.hasNext() && delta.ops.getLast().equals(newOp)) {
             final Delta rest = new Delta(it.rest());
             return delta.concat(rest).chop();
           }
@@ -286,7 +286,7 @@ public class Delta {
   public Delta concat(Delta other) {
     final Delta delta = new Delta(new OpList(ops));
     if (!other.ops.isEmpty()) {
-      delta.push(other.ops.get(0));
+      delta.push(other.ops.getFirst());
       delta.ops.addAll(other.ops.subList(1, other.ops.size()));
     }
     return delta;

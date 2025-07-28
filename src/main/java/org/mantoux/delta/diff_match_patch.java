@@ -17,9 +17,9 @@
  */
 package org.mantoux.delta;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,31 +48,37 @@ public class diff_match_patch {
 
   /** Number of seconds to map a diff before giving up (0 for infinity). */
   public float Diff_Timeout = 1.0f;
+
   /** Cost of an empty edit operation in terms of edit characters. */
   public short Diff_EditCost = 4;
+
   /** At what point is no match declared (0.0 = perfection, 1.0 = very loose). */
   public float Match_Threshold = 0.5f;
+
   /**
    * How far to search for a match (0 = exact location, 1000+ = broad match). A match this many
    * characters away from the expected location will add 1.0 to the score (0.0 is a perfect match).
    */
   public int Match_Distance = 1000;
+
   /**
    * When deleting a large block of text (over ~64 characters), how close do the contents have to be
    * to match the expected contents. (0.0 = perfection, 1.0 = very loose). Note that Match_Threshold
    * controls how closely the end points of a delete need to match.
    */
   public float Patch_DeleteThreshold = 0.5f;
+
   /** Chunk size for context length. */
   public short Patch_Margin = 4;
 
   /** The number of bits in an int. */
-  private short Match_MaxBits = 32;
+  private final short Match_MaxBits = 32;
+
   // Define some regex patterns for matching boundaries.
-  private Pattern BLANKLINEEND = Pattern.compile("\\n\\r?\\n\\Z", Pattern.DOTALL);
+  private final Pattern BLANKLINEEND = Pattern.compile("\\n\\r?\\n\\Z", Pattern.DOTALL);
 
   //  DIFF FUNCTIONS
-  private Pattern BLANKLINESTART = Pattern.compile("\\A\\r?\\n\\r?\\n", Pattern.DOTALL);
+  private final Pattern BLANKLINESTART = Pattern.compile("\\A\\r?\\n\\r?\\n", Pattern.DOTALL);
 
   /**
    * Unescape selected chars for compatability with JavaScript's encodeURI. In speed critical
@@ -805,14 +811,9 @@ public class diff_match_patch {
     for (Diff aDiff : diffs) {
       switch (aDiff.operation) {
         case INSERT:
-          try {
-            text.append("+")
-                .append(URLEncoder.encode(aDiff.text, "UTF-8").replace('+', ' '))
-                .append("\t");
-          } catch (UnsupportedEncodingException e) {
-            // Not likely on modern system.
-            throw new Error("This system does not support UTF-8.", e);
-          }
+          text.append("+")
+              .append(URLEncoder.encode(aDiff.text, StandardCharsets.UTF_8).replace('+', ' '))
+              .append("\t");
           break;
         case DELETE:
           text.append("-").append(aDiff.text.length()).append("\t");
@@ -858,10 +859,7 @@ public class diff_match_patch {
           // decode would change all "+" to " "
           param = param.replace("+", "%2B");
           try {
-            param = URLDecoder.decode(param, "UTF-8");
-          } catch (UnsupportedEncodingException e) {
-            // Not likely on modern system.
-            throw new Error("This system does not support UTF-8.", e);
+            param = URLDecoder.decode(param, StandardCharsets.UTF_8);
           } catch (IllegalArgumentException e) {
             // Malformed URI sequence.
             throw new IllegalArgumentException("Illegal escape in diff_fromDelta: " + param, e);
@@ -869,7 +867,7 @@ public class diff_match_patch {
           diffs.add(new Diff(Operation.INSERT, param));
           break;
         case '-':
-          // Fall through.
+        // Fall through.
         case '=':
           int n;
           try {
@@ -936,8 +934,7 @@ public class diff_match_patch {
     } else if (text.length() == 0) {
       // Nothing to match.
       return -1;
-    } else if (loc + pattern.length() <= text.length()
-        && text.substring(loc, loc + pattern.length()).equals(pattern)) {
+    } else if (loc + pattern.length() <= text.length() && text.startsWith(pattern, loc)) {
       // Perfect match at the perfect spot!  (Includes case of null pattern)
       return loc;
     } else {
@@ -1463,10 +1460,7 @@ public class diff_match_patch {
         line = text.getFirst().substring(1);
         line = line.replace("+", "%2B"); // decode would change all "+" to " "
         try {
-          line = URLDecoder.decode(line, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-          // Not likely on modern system.
-          throw new Error("This system does not support UTF-8.", e);
+          line = URLDecoder.decode(line, StandardCharsets.UTF_8);
         } catch (IllegalArgumentException e) {
           // Malformed URI sequence.
           throw new IllegalArgumentException("Illegal escape in patch_fromText: " + line, e);
@@ -2171,7 +2165,7 @@ public class diff_match_patch {
       line = text.substring(lineStart, lineEnd + 1);
 
       if (lineHash.containsKey(line)) {
-        chars.append(String.valueOf((char) (int) lineHash.get(line)));
+        chars.append((char) (int) lineHash.get(line));
       } else {
         if (lineArray.size() == maxLines) {
           // Bail out at 65535 because
@@ -2181,7 +2175,7 @@ public class diff_match_patch {
         }
         lineArray.add(line);
         lineHash.put(line, lineArray.size() - 1);
-        chars.append(String.valueOf((char) (lineArray.size() - 1)));
+        chars.append((char) (lineArray.size() - 1));
       }
       lineStart = lineEnd + 1;
     }
@@ -2326,6 +2320,7 @@ public class diff_match_patch {
   public static class Diff {
     /** One of: INSERT, DELETE or EQUAL. */
     public Operation operation;
+
     /** The text associated with this diff operation. */
     public String text;
 
@@ -2376,13 +2371,8 @@ public class diff_match_patch {
         return false;
       }
       if (text == null) {
-        if (other.text != null) {
-          return false;
-        }
-      } else if (!text.equals(other.text)) {
-        return false;
-      }
-      return true;
+        return other.text == null;
+      } else return text.equals(other.text);
     }
 
     /**
@@ -2446,12 +2436,8 @@ public class diff_match_patch {
             text.append(' ');
             break;
         }
-        try {
-          text.append(URLEncoder.encode(aDiff.text, "UTF-8").replace('+', ' ')).append("\n");
-        } catch (UnsupportedEncodingException e) {
-          // Not likely on modern system.
-          throw new Error("This system does not support UTF-8.", e);
-        }
+        text.append(URLEncoder.encode(aDiff.text, StandardCharsets.UTF_8).replace('+', ' '))
+            .append("\n");
       }
       return unescapeForEncodeUriCompatability(text.toString());
     }
