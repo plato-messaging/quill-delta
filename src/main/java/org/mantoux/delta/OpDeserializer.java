@@ -1,6 +1,5 @@
 package org.mantoux.delta;
 
-import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -12,7 +11,7 @@ public class OpDeserializer extends JsonDeserializer<Op> {
 
   @Override
   public Op deserialize(JsonParser jsonParser, DeserializationContext deserializationContext)
-      throws IOException, JacksonException {
+      throws IOException {
     // Handle attribute only insert
     var codec = jsonParser.getCodec();
     var node = (ObjectNode) codec.readTree(jsonParser);
