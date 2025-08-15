@@ -3,6 +3,9 @@
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <artifactId>quill-delta</artifactId>
+  <name>QuillDelta</name>
+  <version>1.7.0</version>
+  <url>https://github.com/amantoux/quill-delta</url>
 
   <build>
     <plugins>
@@ -89,7 +92,7 @@
     <dependency>
       <artifactId>jackson-databind</artifactId>
       <groupId>com.fasterxml.jackson.core</groupId>
-      <version>2.13.4.2</version>
+      <version>2.18.2</version>
     </dependency>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -127,8 +130,6 @@
 
   <modelVersion>4.0.0</modelVersion>
 
-  <name>QuillDelta</name>
-
   <!-- Source Control Information, Github Stuff -->
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -155,8 +156,4 @@
     <tag>HEAD</tag>
     <url>https://github.com/amantoux/quill-delta</url>
   </scm>
-
-  <url>https://github.com/amantoux/quill-delta</url>
-
-  <version>1.6.3</version>
 </project>
