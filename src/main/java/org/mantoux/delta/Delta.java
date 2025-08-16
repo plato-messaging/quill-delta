@@ -44,7 +44,7 @@ public class Delta {
   public Delta insert(Object arg, AttributeMap attributes) {
     if (arg == null) return this;
     // 0x200b is NOT a white space character
-    if (arg instanceof String && ((String) arg).isBlank()) return this;
+    if (arg instanceof String string && string.isEmpty()) return this;
     return push(Op.insert(arg, attributes));
   }
 
