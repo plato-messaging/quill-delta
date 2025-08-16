@@ -5,6 +5,13 @@
   <artifactId>quill-delta</artifactId>
   <name>QuillDelta</name>
   <version>1.7.0</version>
+  <description>A java implementation of the fabulous QuillJS delta.</description>
+  <developers>
+    <developer>
+      <email>alan@mantoux.org</email>
+      <name>Alan Mantoux</name>
+    </developer>
+  </developers>
   <url>https://github.com/amantoux/quill-delta</url>
 
   <build>
@@ -30,6 +37,7 @@
             <goals>
               <goal>jar</goal>
             </goals>
+            <phase>package</phase>
             <id>attach-javadocs</id>
           </execution>
         </executions>
@@ -37,15 +45,13 @@
         <version>3.3.1</version>
       </plugin>
       <plugin>
-        <artifactId>nexus-staging-maven-plugin</artifactId>
-        <configuration>
-          <autoReleaseAfterClose>true</autoReleaseAfterClose>
-          <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-          <serverId>ossrh</serverId>
-        </configuration>
+        <groupId>org.sonatype.central</groupId>
+        <artifactId>central-publishing-maven-plugin</artifactId>
+        <version>0.8.0</version>
         <extensions>true</extensions>
-        <groupId>org.sonatype.plugins</groupId>
-        <version>1.6.13</version>
+        <configuration>
+          <publishingServerId>central</publishingServerId>
+        </configuration>
       </plugin>
       <plugin>
         <artifactId>maven-source-plugin</artifactId>
@@ -54,6 +60,7 @@
             <goals>
               <goal>jar</goal>
             </goals>
+            <phase>package</phase>
             <id>attach-sources</id>
           </execution>
         </executions>
@@ -101,14 +108,6 @@
       <version>5.8.1</version>
     </dependency>
   </dependencies>
-
-  <description>A java implementation of the fabulous QuillJS delta.</description>
-  <developers>
-    <developer>
-      <email>alan@mantoux.org</email>
-      <name>Alan Mantoux</name>
-    </developer>
-  </developers>
 
   <distributionManagement>
     <repository>
