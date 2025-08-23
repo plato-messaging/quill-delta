@@ -52,19 +52,19 @@ class OpTest {
 
     @Test
     public void hasNext() {
-      OpList.Iterator it = delta.ops.iterator();
+      Delta.Iterator it = delta.iterator();
       assertTrue(it.hasNext());
     }
 
     @Test
     public void hasNoNext() {
-      OpList.Iterator it = new OpList().iterator();
+      Delta.Iterator it = new Delta().iterator();
       assertFalse(it.hasNext());
     }
 
     @Test
     public void peekLengthNoOffset() {
-      OpList.Iterator it = delta.ops.iterator();
+      Delta.Iterator it = delta.iterator();
       assertEquals(5, it.peekLength(), "Incorrect peek length on insert string");
       it.next();
       assertEquals(3, it.peekLength(), "Incorrect peek length on retain");
@@ -76,9 +76,9 @@ class OpTest {
 
     @Test
     public void next() {
-      OpList.Iterator it = delta.ops.iterator();
-      for (int i = 0; i < delta.ops.size(); i++) {
-        assertEquals(delta.ops.get(i), it.next());
+      Delta.Iterator it = delta.iterator();
+      for (Op op : delta) {
+        assertEquals(op, it.next());
       }
       assertEquals(Op.retainUntilEnd(), it.next());
       assertEquals(Op.retainUntilEnd(), it.next(4));
@@ -87,7 +87,7 @@ class OpTest {
 
     @Test
     public void nextLength() {
-      OpList.Iterator it = delta.ops.iterator();
+      Delta.Iterator it = delta.iterator();
       assertEquals(Op.insert("He", of("bold", true)), it.next(2));
       assertEquals(Op.insert("llo", of("bold", true)), it.next(10));
       assertEquals(Op.retain(1), it.next(1));
@@ -96,23 +96,22 @@ class OpTest {
 
     @Test
     public void rest() {
-      OpList.Iterator it = delta.ops.iterator();
+      Delta.Iterator it = delta.iterator();
       it.next(2);
-      OpList expected = new OpList();
+      Delta expected = new Delta();
       expected.add(Op.insert("llo", of("bold", true)));
       expected.add(Op.retain(3));
       expected.add(Op.insert("2", of("src", "https://plato.mantoux.org")));
       expected.add(Op.delete(4));
       assertEquals(expected, it.rest());
       it.next(3);
-      new OpList();
       expected.add(Op.retain(3));
       expected.add(Op.insert("2", of("src", "https://plato.mantoux.org")));
       expected.add(Op.delete(4));
       it.next(3);
       it.next(2);
       it.next(4);
-      assertEquals(new OpList(), it.rest());
+      assertEquals(new Delta(), it.rest());
     }
   }
 }

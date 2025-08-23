@@ -16,27 +16,25 @@ public class SerializeTest {
   public void deserializeInsertEmbed() throws Exception {
     var json =
         """
-            {
-              "ops": [
-                {
-                  "retain": 1033,
-                  "attributes": {
-                    "bold": true,
-                    "italic": false
-                  }
-                },
-                {
-                  "insert": {
-                    "_type": "hr",
-                    "_inline": false
-                  }
-                },
-                {
-                  "delete": 1
-                }
-              ]
+        [
+          {
+            "retain": 1033,
+            "attributes": {
+              "bold": true,
+              "italic": false
             }
-            """;
+          },
+          {
+            "insert": {
+              "_type": "hr",
+              "_inline": false
+            }
+          },
+          {
+            "delete": 1
+          }
+        ]
+        """;
     var act = mapper.readValue(json, Delta.class);
     var exp =
         new Delta()
@@ -50,28 +48,26 @@ public class SerializeTest {
   public void deserializeInsertFormattedString() throws Exception {
     var json =
         """
-            {
-              "ops": [
-                {
-                  "retain": 1033,
-                  "attributes": {
-                    "bold": true,
-                    "italic": false
-                  }
-                },
-                {
-                  "insert": "coucou",
-                  "attributes": {
-                    "bold": true,
-                    "italic": false
-                  }
-                },
-                {
-                  "delete": 1
-                }
-              ]
+        [
+          {
+            "retain": 1033,
+            "attributes": {
+              "bold": true,
+              "italic": false
             }
-            """;
+          },
+          {
+            "insert": "coucou",
+            "attributes": {
+              "bold": true,
+              "italic": false
+            }
+          },
+        {
+          "delete": 1
+        }
+      ]
+      """;
     var act = mapper.readValue(json, Delta.class);
     var exp =
         new Delta()
@@ -85,20 +81,18 @@ public class SerializeTest {
   public void deserializeInsertBasicString() throws Exception {
     var json =
         """
-            {
-              "ops": [
-                {
-                  "retain": 1033
-                },
-                {
-                  "insert": "coucou"
-                },
-                {
-                  "delete": 1
-                }
-              ]
-            }
-            """;
+         [
+          {
+            "retain": 1033
+          },
+          {
+            "insert": "coucou"
+          },
+          {
+            "delete": 1
+          }
+         ]
+         """;
     var act = mapper.readValue(json, Delta.class);
     var exp = new Delta().retain(1033).insert("coucou").delete(1);
     assertEquals(act, exp);
@@ -106,12 +100,7 @@ public class SerializeTest {
 
   @Test
   void deserializeEmptyDelta() throws Exception {
-    var json =
-        """
-        {
-          "ops": []
-        }
-        """;
+    var json = "[]";
     var act = mapper.readValue(json, Delta.class);
     var exp = new Delta();
     assertEquals(act, exp);
