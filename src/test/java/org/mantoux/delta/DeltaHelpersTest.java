@@ -23,7 +23,7 @@ class DeltaHelpersTest {
     @Test
     public void unmergeable() {
       var delta = new Delta().insert("Test");
-      var original = new Delta(new OpList(delta.ops));
+      var original = new Delta(delta);
       var concat = new Delta().insert("!", of("bold", true));
       var expected = new Delta().insert("Test").insert("!", of("bold", true));
       assertEquals(expected, delta.concat(concat));
@@ -33,7 +33,7 @@ class DeltaHelpersTest {
     @Test
     public void mergeable() {
       var delta = new Delta().insert("Test", of("bold", true));
-      var original = new Delta(new OpList(delta.ops));
+      var original = new Delta(delta);
       var concat = new Delta().insert("!", of("bold", true)).insert("\n");
       var expected = new Delta().insert("Test!", of("bold", true)).insert("\n");
       assertEquals(expected, delta.concat(concat));

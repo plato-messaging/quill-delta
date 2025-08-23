@@ -1,44 +1,42 @@
 package org.mantoux.delta;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static java.util.stream.Collectors.toList;
 import static org.mantoux.delta.Op.Type.DELETE;
 import static org.mantoux.delta.Op.Type.INSERT;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @JsonInclude(value = NON_NULL)
-public class Delta {
-  @JsonProperty("ops")
-  final OpList ops;
+public class Delta extends ArrayList<Op> {
 
-  public Delta(OpList ops) {
-    if (ops == null)
-      throw new IllegalArgumentException("Ops cannot be null, use Delta() for empty ops");
-    this.ops = ops;
+  public Delta(Collection<Op> other) {
+    super(other);
   }
 
   public Delta() {
-    this(new OpList());
+    super();
   }
 
-  public Delta(Delta delta) {
-    this(delta.ops);
+  @Override
+  public Iterator iterator() {
+    return new Iterator(this);
   }
 
-  public OpList getOps() {
-    return new OpList(ops);
+  private void insertFirst(Op element) {
+    add(0, element);
+  }
+
+  public Delta filter(Predicate<Op> predicate) {
+    return new Delta(stream().filter(predicate).collect(toList()));
   }
 
   public Delta insert(Object arg, AttributeMap attributes) {
@@ -72,15 +70,15 @@ public class Delta {
 
   // TODO : P1 - TEST
   public Delta push(Op newOp) {
-    if (ops.isEmpty()) {
-      ops.add(newOp);
+    if (isEmpty()) {
+      add(newOp);
       return this;
     }
-    int index = ops.size();
-    Op lastOp = ops.get(index - 1);
+    int index = size();
+    Op lastOp = get(index - 1);
     newOp = newOp.copy();
     if (newOp.isDelete() && lastOp.isDelete()) {
-      ops.set(index - 1, Op.delete(lastOp.length() + newOp.length()));
+      set(index - 1, Op.delete(lastOp.length() + newOp.length()));
       return this;
     }
     // Since it does not matter if we insert before or after deleting at the same index,
@@ -88,10 +86,10 @@ public class Delta {
     if (lastOp.isDelete() && newOp.isInsert()) {
       index -= 1;
       if (index == 0) {
-        ops.insertFirst(newOp);
+        insertFirst(newOp);
         return this;
       }
-      lastOp = ops.get(index - 1);
+      lastOp = get(index - 1);
     }
 
     if (Objects.equals(newOp.attributes(), lastOp.attributes())) {
@@ -99,45 +97,37 @@ public class Delta {
         if (newOp.arg() instanceof String && lastOp.arg() instanceof String) {
           final Op mergedOp =
               Op.insert(lastOp.argAsString() + newOp.argAsString(), newOp.attributes());
-          this.ops.set(index - 1, mergedOp);
+          set(index - 1, mergedOp);
           return this;
         }
       }
       if (lastOp.isRetain() && newOp.isRetain()) {
         final Op mergedOp = Op.retain(lastOp.length() + newOp.length(), newOp.attributes());
-        ops.set(index - 1, mergedOp);
+        set(index - 1, mergedOp);
         return this;
       }
     }
-    if (index == ops.size()) ops.add(newOp);
-    else ops.add(index, newOp);
+    if (index == size()) add(newOp);
+    else add(index, newOp);
     return this;
   }
 
   public Delta chop() {
-    if (ops.isEmpty()) return this;
-    Op lastOp = ops.getLast();
+    if (isEmpty()) return this;
+    Op lastOp = getLast();
     if (lastOp.isRetain() && lastOp.attributes() == null) {
-      ops.removeLast();
+      removeLast();
     }
     return this;
   }
 
-  public OpList filter(Predicate<Op> predicate) {
-    return ops.filter(predicate);
-  }
-
-  public void forEach(Consumer<Op> consumer) {
-    ops.forEach(consumer);
-  }
-
   public <T> List<T> map(Function<Op, T> mapper) {
-    return ops.stream().map(mapper).collect(Collectors.toList());
+    return stream().map(mapper).collect(Collectors.toList());
   }
 
   public List<Op>[] partition(Predicate<Op> predicate) {
-    final OpList passed = new OpList();
-    final OpList failed = new OpList();
+    final Delta passed = new Delta();
+    final Delta failed = new Delta();
     forEach(
         op -> {
           if (predicate.test(op)) {
@@ -146,11 +136,11 @@ public class Delta {
             failed.add(op);
           }
         });
-    return new OpList[] {passed, failed};
+    return new Delta[] {passed, failed};
   }
 
   public <T> T reduce(T initialValue, BiFunction<T, Op, T> accumulator) {
-    return ops.stream().reduce(initialValue, accumulator, (value1, value2) -> value2);
+    return stream().reduce(initialValue, accumulator, (value1, value2) -> value2);
   }
 
   public int changeLength() {
@@ -172,10 +162,10 @@ public class Delta {
   }
 
   public Delta compose(Delta other) {
-    final OpList.Iterator it = ops.iterator();
-    final OpList.Iterator otherIt = other.ops.iterator();
+    final Delta.Iterator it = iterator();
+    final Delta.Iterator otherIt = other.iterator();
 
-    final OpList combined = new OpList();
+    final Delta combined = new Delta();
     final Op firstOther = otherIt.peek();
     if (firstOther != null && firstOther.isRetain() && firstOther.attributes() == null) {
       int firstLeft = firstOther.length();
@@ -206,7 +196,7 @@ public class Delta {
           else newOp = Op.insert(thisOp.arg(), attributes);
           delta.push(newOp);
           // Optimization if rest of other is just retain
-          if (!otherIt.hasNext() && delta.ops.getLast().equals(newOp)) {
+          if (!otherIt.hasNext() && delta.getLast().equals(newOp)) {
             final Delta rest = new Delta(it.rest());
             return delta.concat(rest).chop();
           }
@@ -219,7 +209,7 @@ public class Delta {
   }
 
   public void eachLine(BiFunction<Delta, AttributeMap, Boolean> predicate, String newLine) {
-    final OpList.Iterator it = ops.iterator();
+    final Delta.Iterator it = iterator();
     Delta line = new Delta();
     while (it.hasNext()) {
       if (it.peekType() != INSERT) return;
@@ -268,33 +258,33 @@ public class Delta {
   }
 
   public Delta slice(int start, int end) {
-    final OpList ops = new OpList();
-    final OpList.Iterator it = this.ops.iterator();
+    final Delta newDelta = new Delta();
+    final Delta.Iterator it = iterator();
     int index = 0;
     while (index < end && it.hasNext()) {
       Op nextOp;
       if (index < start) nextOp = it.next(start - index);
       else {
         nextOp = it.next(end - index);
-        ops.add(nextOp);
+        newDelta.add(nextOp);
       }
       index += nextOp.length();
     }
-    return new Delta(ops);
+    return newDelta;
   }
 
   public Delta concat(Delta other) {
-    final Delta delta = new Delta(new OpList(ops));
-    if (!other.ops.isEmpty()) {
-      delta.push(other.ops.getFirst());
-      delta.ops.addAll(other.ops.subList(1, other.ops.size()));
+    final Delta delta = new Delta(this);
+    if (!other.isEmpty()) {
+      delta.push(other.getFirst());
+      delta.addAll(other.subList(1, other.size()));
     }
     return delta;
   }
 
   public String plainText() {
     StringBuilder builder = new StringBuilder();
-    for (Op op : ops) {
+    for (Op op : this) {
       if (op.isTextInsert()) {
         builder.append(op.argAsString());
       } else {
@@ -305,19 +295,6 @@ public class Delta {
   }
 
   @Override
-  public int hashCode() {
-    return Objects.hash(ops);
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    Delta delta = (Delta) o;
-    return Objects.equals(ops, delta.ops);
-  }
-
-  @Override
   public String toString() {
     ObjectMapper mapper = new ObjectMapper();
     ObjectWriter writer = mapper.writerWithDefaultPrettyPrinter();
@@ -325,6 +302,86 @@ public class Delta {
       return writer.writeValueAsString(this);
     } catch (JsonProcessingException e) {
       return "Error while generating json:\n" + e.getMessage();
+    }
+  }
+
+  public static class Iterator implements java.util.Iterator<Op> {
+
+    private final Delta delta;
+
+    private int index = 0;
+    private int offset = 0;
+
+    Iterator(Delta delta) {
+      this.delta = delta;
+    }
+
+    public Op next(int length) {
+      if (index >= delta.size()) return Op.retain(Integer.MAX_VALUE, null);
+
+      final Op nextOp = delta.get(index);
+      final int offset = this.offset;
+      final int opLength = nextOp.length();
+
+      if (length >= opLength - offset) {
+        length = opLength - offset;
+        this.index += 1;
+        this.offset = 0;
+      } else {
+        this.offset += length;
+      }
+
+      if (nextOp.isDelete()) {
+        return Op.delete(length);
+      } else {
+        Op retOp;
+        if (nextOp.isRetain()) retOp = Op.retain(length, nextOp.attributes());
+        else if (nextOp.isTextInsert())
+          retOp =
+              Op.insert(
+                  nextOp.argAsString().substring(offset, offset + length), nextOp.attributes());
+        else retOp = Op.insert(nextOp.arg(), nextOp.attributes());
+        return retOp;
+      }
+    }
+
+    public Op peek() {
+      if (index >= delta.size()) return null;
+      return delta.get(index);
+    }
+
+    public int peekLength() {
+      if (index >= delta.size()) return Integer.MAX_VALUE;
+      return delta.get(index).length() - offset;
+    }
+
+    public Op.Type peekType() {
+      if (index >= delta.size()) return Op.Type.RETAIN;
+      return delta.get(index).type();
+    }
+
+    public Delta rest() {
+      if (!hasNext()) return new Delta();
+      if (offset == 0) return new Delta(delta.subList(index, delta.size()));
+      final int offset = this.offset;
+      final int index = this.index;
+      final Op next = next();
+      final Delta rest = new Delta(delta.subList(this.index, delta.size()));
+      this.offset = offset;
+      this.index = index;
+      var delta = new Delta(List.of(next));
+      delta.addAll(rest);
+      return delta;
+    }
+
+    @Override
+    public boolean hasNext() {
+      return this.peekLength() < Integer.MAX_VALUE;
+    }
+
+    @Override
+    public Op next() {
+      return next(Integer.MAX_VALUE);
     }
   }
 }
