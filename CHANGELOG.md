@@ -1,3 +1,7 @@
+## NEXT
+
+- `Op` implements `java.io.Serializable`
+
 ## 2.0.0
 
 ### Breaking changes

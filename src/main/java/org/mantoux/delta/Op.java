@@ -11,11 +11,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.io.Serializable;
 import java.util.Objects;
 
 @JsonInclude(value = NON_EMPTY)
 @JsonDeserialize(using = OpDeserializer.class)
-public class Op {
+public class Op implements Serializable {
 
   // 0 length white space
   // placeholder for embedded in diff (no implementation so far)
