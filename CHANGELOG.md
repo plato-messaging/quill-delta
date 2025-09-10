@@ -1,4 +1,4 @@
-## NEXT
+## 2.0.1
 
 - `Op` implements `java.io.Serializable`
 
